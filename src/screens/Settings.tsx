@@ -196,9 +196,11 @@ export default function SettingsScreen() {
             </div>
             <div className="card stack" style={{ gap: 4 }}>
               <div className="card-title">Where defaults apply</div>
-              <div className="kv"><span className="k">Onboarding</span><span className="v">Step 1 risk tier · Step 2 document checklist</span></div>
-              <div className="kv"><span className="k">Procurement</span><span className="v">Stage 3 quotes · Stage 4 booking terms · Stage 6 payments</span></div>
-              <div className="kv"><span className="k">Contingency</span><span className="v">Penalty maths when a backup is activated</span></div>
+              <div className="kv-grid">
+                <span className="k">Onboarding</span><span className="v">Step 1 risk tier · Step 2 document checklist</span>
+                <span className="k">Procurement</span><span className="v">Stage 3 quotes · Stage 4 booking terms · Stage 6 payments</span>
+                <span className="k">Contingency</span><span className="v">Penalty maths when a backup is activated</span>
+              </div>
             </div>
           </div>
         </div>

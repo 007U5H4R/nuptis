@@ -547,10 +547,10 @@ a { color: var(--link); text-decoration: none; }
 .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .roles-grid { display: grid; grid-template-columns: max-content 1fr; column-gap: 10px; row-gap: 9px; align-items: start; font-size: 12.5px; }
 .roles-grid .desc { color: var(--muted); line-height: 1.4; padding-top: 2px; }
-.kv { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
-.kv:last-child { border-bottom: 0; }
-.kv .k { color: var(--muted); }
-.kv .v { font-weight: 500; text-align: right; }
+.kv-grid { display: grid; grid-template-columns: max-content 1fr; column-gap: 16px; row-gap: 10px; font-size: 12.5px; }
+.kv-grid .k { color: var(--muted); padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.kv-grid .v { font-weight: 500; text-align: left; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.kv-grid > *:nth-last-child(-n+2) { border-bottom: 0; }
 
 .avatar-s { width: 26px; height: 26px; border-radius: 50%; background: var(--avatar-bg); color: #fff; font-size: 10px; font-weight: 600; display: grid; place-items: center; flex: 0 0 26px; }
 
