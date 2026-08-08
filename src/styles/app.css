@@ -29,34 +29,33 @@ a { color: var(--link); text-decoration: none; }
 /* ============ shell ============ */
 .shell { display: grid; grid-template-columns: 220px 1fr; height: 100vh; overflow: hidden; }
 .sidebar {
-  background: var(--sidebar);
-  color: rgba(255, 255, 255, 0.86);
+  background: var(--sidebar-bg);
+  color: var(--sidebar-text);
   display: flex; flex-direction: column;
   padding: 16px 10px;
   backdrop-filter: blur(24px);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid var(--sidebar-border);
 }
 .side-brand {
   font-family: var(--font-brand);
   font-weight: 900;
   letter-spacing: 1.5px;
   font-size: 19px;
-  color: #8fb4ec;
+  color: var(--brand-color);
   padding: 6px 12px 18px;
   user-select: none;
 }
-[data-theme='dark'] .side-brand { color: #9fbdea; }
 .side-nav { display: flex; flex-direction: column; gap: 2px; }
 .nav-item {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px;
   border-radius: var(--radius-lg);
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--sidebar-text);
   font-weight: 500;
   border: 0; background: transparent; text-align: left; width: 100%;
 }
-.nav-item:hover { background: rgba(255, 255, 255, 0.07); color: #fff; }
-.nav-item.active { background: var(--sidebar-active); color: #fff; }
+.nav-item:hover { background: var(--sidebar-hover-bg); color: var(--sidebar-text-hover); }
+.nav-item.active { background: var(--sidebar-active-bg); color: var(--sidebar-active-text); }
 .nav-icon { width: 17px; text-align: center; opacity: 0.9; font-size: 14px; }
 .side-bottom { margin-top: auto; }
 
@@ -72,7 +71,7 @@ a { color: var(--link); text-decoration: none; }
 }
 .tb-search {
   display: flex; align-items: center; gap: 8px;
-  width: 320px; height: 34px;
+  width: 340px; height: 34px;
   padding: 0 12px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
@@ -80,6 +79,7 @@ a { color: var(--link); text-decoration: none; }
   color: var(--muted);
   font-size: 13px;
 }
+.tb-search span:first-of-type { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .tb-search:hover { border-color: var(--border-strong); }
 .kbd {
   font-size: 10.5px; padding: 1px 5px;
