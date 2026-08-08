@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import type { AppState, Flag, Invite, Notification, OnboardingDraft, Session, Settings, Theme, Toast, Vendor, Wedding } from './types';
+import type { AppState, Flag, Invite, Notification, OnboardingDraft, Session, Settings, Theme, Toast, Vendor, Wedding, WorkOrder } from './types';
 import { emptyDraft, seedState } from './seed';
 
 const STORAGE_KEY = 'nuptis-state-v1';
@@ -24,6 +24,7 @@ type Action =
   | { type: 'DRAFT_RESET' }
   | { type: 'PUBLISH_VENDOR'; vendor: Vendor }
   | { type: 'WEDDING_ADD'; wedding: Wedding }
+  | { type: 'WO_ADD'; wo: WorkOrder }
   | { type: 'MILESTONE_PAY'; id: string }
   | { type: 'INVITE_ADD'; invite: Invite }
   | { type: 'INVITE_REMOVE'; id: string }
@@ -198,7 +199,23 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'WEDDING_ADD': {
       let s: AppState = { ...state, weddings: [action.wedding, ...state.weddings] };
-      s = pushToast(s, { tone: 'success', title: 'Wedding created', desc: `${action.wedding.couple} — ${action.wedding.ceremonies} ceremonies, ${action.wedding.month}.` });
+      s = pushToast(s, {
+        tone: 'success',
+        title: 'Wedding created',
+        desc: `${action.wedding.couple} — now raise its work orders from the Procurement Board.`,
+        route: '/procurement',
+      });
+      return s;
+    }
+    case 'WO_ADD': {
+      const vendor = state.vendors.find((v) => v.id === action.wo.vendorId);
+      let s: AppState = { ...state, workOrders: [action.wo, ...state.workOrders] };
+      s = pushToast(s, {
+        tone: 'success',
+        title: `Work order raised — ${action.wo.id}`,
+        desc: `${action.wo.ceremony} · ${vendor?.name} · starts at Requirements.`,
+        route: `/procurement/${action.wo.id}`,
+      });
       return s;
     }
     case 'MILESTONE_PAY': {
