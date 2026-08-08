@@ -11,7 +11,24 @@ npm install
 npm run dev        # http://localhost:5173
 ```
 
-Sign in with any valid email + a 4-character password (demo auth — you enter as the workspace Owner). All data is seeded and persisted to `localStorage`; use **Profile → Reset demo data** to restore the original dataset.
+**Two modes, same UI, zero code branches in the screens:**
+
+- **Offline demo (default, no setup)** — sign in with any valid email + a 4-character password; you enter as the workspace Owner. Data is seeded and persisted to `localStorage`. **Profile → Reset demo data** restores the original dataset.
+- **Supabase-backed (real backend)** — once `.env.local` is present (see below), Login switches to real email/password auth, and every action in `store.tsx` mirrors to Postgres instead of `localStorage`. **Profile → Refresh workspace data** re-pulls from the database.
+
+### Connecting Supabase
+
+1. Create a project at [supabase.com](https://supabase.com) → **Settings → API** → copy the **Project URL** and **`anon` `public`** key (never the `service_role` key).
+2. Create `.env.local` in the repo root (gitignored):
+   ```
+   VITE_SUPABASE_URL=https://xxxx.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJ...
+   ```
+3. **Authentication → Providers → Email** → turn off "Confirm email" for instant demo sign-ups (or leave it on for a real confirmation flow).
+4. **SQL Editor** → paste all of [`supabase/schema.sql`](supabase/schema.sql) → Run. This creates every table, Row Level Security policies, the seed dataset, and four Postgres functions (`activate_backup`, `source_backup`, `approve_change_order`, `log_outcome`) that each wrap a Contingency Panel confirmation in one atomic transaction.
+5. `npm run dev` (or rebuild) — Login now shows a Sign in / Create account toggle.
+
+RLS model: any authenticated user has full read/write access — this is a single-workspace app today (matches the product's current scope), not a multi-tenant SaaS. Adding tenants later means a `workspace_id` column plus a policy swap, not a rewrite.
 
 ## What's implemented
 
@@ -35,7 +52,14 @@ src/
   seed.ts         demo dataset — mirrors the Figma mockup's content exactly
   store.tsx       React context + reducer; every business action
                   (ACTIVATE_BACKUP, APPROVE_CO, ADVANCE_STAGE, …) is a
-                  reducer case; state persists to localStorage
+                  reducer case. Dispatch is optimistic: it applies locally,
+                  then — only when Supabase is configured and a session
+                  exists — mirrors the same action to Postgres; offline mode
+                  persists to localStorage instead, untouched by any of this.
+  lib/
+    supabase.ts   client + isSupabaseConfigured flag (env-driven)
+    cloud.ts      one function per mutating action + row<->type mappers;
+                  this is the entire surface a real backend has to implement
   styles/
     tokens.css    the NuptisV2 token set — light + dark via [data-theme],
                   ported from the Figma variable collection (Light 3:2 / Dark 86:0)
@@ -54,7 +78,9 @@ src/
 
 ## Productionizing path
 
-This is a front-end with an honest mock data layer, not a hosted product. To take it live: (1) replace the store's reducer effects with API calls (each action is already a named, typed mutation); (2) real auth (the session object and route guard are in place); (3) Postgres schema is essentially `types.ts` (Vendor → Wedding → WorkOrder → Milestone → ContingencyEvent, mirroring the PRD's data model); (4) notifications move server-side with the same tone/route contract.
+**Done:** real Postgres schema (`supabase/schema.sql`), real auth, RLS, and the four contingency actions as atomic server-side transactions instead of client-side object spreads.
+
+**Still ahead for a real multi-tenant product:** workspace scoping (one `workspace_id` column + policy change, not a rewrite — see above); role-based row access beyond "any authenticated user" (Settings already models Owner/Vendor Manager/Finance, RLS doesn't enforce it yet); Realtime subscriptions on `flags`/`notifications` so a second open tab sees a new risk flag land live; moving the two demo-scenario constants in `schema.sql` (the 30%-advance/2×-penalty math, the WO-2052 reprice amount) from hardcoded SQL into the already-editable Vendor Defaults tab.
 
 ## Provenance
 

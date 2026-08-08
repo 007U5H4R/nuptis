@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 import type { AppState, Flag, Invite, Notification, OnboardingDraft, Session, Settings, Theme, Toast, Vendor, Wedding, WorkOrder } from './types';
 import { emptyDraft, seedState } from './seed';
+import { isSupabaseConfigured, supabase } from './lib/supabase';
+import * as cloud from './lib/cloud';
+import type { CloudData } from './lib/cloud';
 
 const STORAGE_KEY = 'nuptis-state-v1';
 const THEME_KEY = 'nuptis-theme';
@@ -31,7 +34,11 @@ type Action =
   | { type: 'SETTINGS_SET'; patch: Partial<Settings> }
   | { type: 'NOTIF_PREF_SET'; key: keyof Settings['notif']; value: boolean | string }
   | { type: 'DEFAULT_SET'; key: keyof Settings['defaults']; value: boolean | string }
-  | { type: 'RESET_DEMO' };
+  | { type: 'RESET_DEMO' }
+  | { type: 'HYDRATE'; data: CloudData };
+
+/** Action types with no server-side counterpart — never sent to Supabase. */
+const LOCAL_ONLY = new Set<Action['type']>(['LOGIN', 'LOGOUT', 'SET_THEME', 'TOAST_PUSH', 'TOAST_DISMISS', 'DRAFT_SET', 'DRAFT_RESET', 'RESET_DEMO', 'HYDRATE']);
 
 let toastSeq = 1;
 
@@ -245,16 +252,49 @@ function reducer(state: AppState, action: Action): AppState {
       const fresh = seedState();
       return { ...fresh, session: state.session, theme: state.theme };
     }
+    case 'HYDRATE':
+      return { ...state, ...action.data };
     default:
       return state;
   }
 }
 
+/** Mirrors each mutating action to Supabase. Called after the optimistic
+ * local dispatch — never awaited by the UI, errors surface as a toast. */
+async function syncAction(action: Action): Promise<void> {
+  switch (action.type) {
+    case 'SET_STAGE': return cloud.cloudSetStage(action.woId, action.stage);
+    case 'ADVANCE_STAGE': return cloud.cloudAdvanceStage(action.woId);
+    case 'FLAG_ADD': return cloud.cloudAddManualFlag(action.flag);
+    case 'ACTIVATE_BACKUP': return cloud.cloudActivateBackup(action.flagId, action.backupVendorId);
+    case 'SOURCE_BACKUP': return cloud.cloudSourceBackup(action.flagId, action.vendorId);
+    case 'APPROVE_CO': return cloud.cloudApproveChangeOrder(action.flagId);
+    case 'LOG_OUTCOME': return cloud.cloudLogOutcome(action.flagId, action.recommend);
+    case 'PUBLISH_VENDOR': return cloud.cloudInsertVendor(action.vendor);
+    case 'WEDDING_ADD': return cloud.cloudInsertWedding(action.wedding);
+    case 'WO_ADD': return cloud.cloudInsertWorkOrder(action.wo);
+    case 'MILESTONE_PAY': return cloud.cloudMarkMilestonePaid(action.id);
+    case 'INVITE_ADD': return cloud.cloudInsertInvite(action.invite);
+    case 'INVITE_REMOVE': return cloud.cloudRemoveInvite(action.id);
+    case 'SETTINGS_SET': return cloud.cloudUpdateProfile(action.patch);
+    case 'NOTIF_PREF_SET':
+      if (action.key === 'highSeverity') return; // locked — load-bearing rule, never written
+      return cloud.cloudSetNotifPref(action.key as string, action.value);
+    case 'DEFAULT_SET': return cloud.cloudSetDefault(action.key as string, action.value);
+    case 'NOTIF_READ': return cloud.cloudNotifRead(action.id);
+    case 'NOTIFS_READ': return cloud.cloudNotifsReadAll();
+    default: return; // LOCAL_ONLY member — nothing to sync
+  }
+}
+
 function loadInitial(): AppState {
+  const theme = (localStorage.getItem(THEME_KEY) as Theme) || 'system';
+  // Cloud mode never trusts locally-cached domain data — real state arrives
+  // via HYDRATE once Supabase confirms a session. Only the theme carries over.
+  if (isSupabaseConfigured) return { ...seedState(), session: null, theme };
   const base = seedState();
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    const theme = (localStorage.getItem(THEME_KEY) as Theme) || 'system';
     if (raw) {
       const saved = JSON.parse(raw) as Partial<AppState>;
       return { ...base, ...saved, theme, toasts: [] };
@@ -265,17 +305,82 @@ function loadInitial(): AppState {
   }
 }
 
-const StoreCtx = createContext<{ state: AppState; dispatch: React.Dispatch<Action> } | null>(null);
+interface StoreCtxValue {
+  state: AppState;
+  dispatch: React.Dispatch<Action>;
+  refresh: () => Promise<void>;
+}
+const StoreCtx = createContext<StoreCtxValue | null>(null);
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, loadInitial);
-
-  // persist (toasts excluded)
+  const [state, rawDispatch] = useReducer(reducer, undefined, loadInitial);
+  const stateRef = useRef(state);
   useEffect(() => {
-    const { toasts, theme, ...rest } = state;
+    stateRef.current = state;
+  }, [state]);
+
+  // optimistic dispatch: apply locally first, then mirror to Supabase (if configured)
+  const dispatch: React.Dispatch<Action> = (action) => {
+    rawDispatch(action);
+    if (isSupabaseConfigured && stateRef.current.session && !LOCAL_ONLY.has(action.type)) {
+      syncAction(action).catch((err: Error) => {
+        rawDispatch({ type: 'TOAST_PUSH', toast: { tone: 'danger', title: 'Sync failed — kept locally only', desc: err.message ?? String(err) } });
+      });
+    }
+  };
+
+  const refresh = async () => {
+    if (!isSupabaseConfigured) {
+      rawDispatch({ type: 'RESET_DEMO' });
+      return;
+    }
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
-      localStorage.setItem(THEME_KEY, theme);
+      const data = await cloud.fetchAll();
+      rawDispatch({ type: 'HYDRATE', data });
+    } catch (err) {
+      rawDispatch({ type: 'TOAST_PUSH', toast: { tone: 'danger', title: 'Could not refresh workspace data', desc: (err as Error).message ?? String(err) } });
+    }
+  };
+
+  // Supabase auth bootstrap: on sign-in, hydrate all tables + set the session
+  // together (one combined update, so the UI never flashes stale seed data).
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+    let active = true;
+    const onAuthed = async (email: string | undefined) => {
+      if (!email) {
+        rawDispatch({ type: 'LOGOUT' });
+        return;
+      }
+      try {
+        const [profile, data] = await Promise.all([cloud.fetchProfile(email), cloud.fetchAll()]);
+        if (!active) return;
+        const session: Session = profile
+          ? { email: profile.email, name: profile.name, role: profile.role }
+          : { email, name: email.split('@')[0], role: 'Owner' };
+        rawDispatch({ type: 'HYDRATE', data });
+        rawDispatch({ type: 'LOGIN', session });
+      } catch (err) {
+        if (!active) return;
+        rawDispatch({ type: 'TOAST_PUSH', toast: { tone: 'danger', title: 'Could not load workspace data', desc: (err as Error).message ?? String(err) } });
+      }
+    };
+    supabase.auth.getSession().then(({ data }) => onAuthed(data.session?.user.email));
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => onAuthed(session?.user.email));
+    return () => {
+      active = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
+
+  // persist (offline mode only — cloud mode's source of truth is Postgres)
+  useEffect(() => {
+    try {
+      localStorage.setItem(THEME_KEY, state.theme);
+      if (!isSupabaseConfigured) {
+        const { toasts, theme, ...rest } = state;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
+      }
     } catch {}
   }, [state]);
 
@@ -291,7 +396,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return () => mq.removeEventListener('change', apply);
   }, [state.theme]);
 
-  const value = useMemo(() => ({ state, dispatch }), [state]);
+  const value = useMemo(() => ({ state, dispatch, refresh }), [state]);
   return <StoreCtx.Provider value={value}>{children}</StoreCtx.Provider>;
 }
 

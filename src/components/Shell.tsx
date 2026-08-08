@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useApp } from '../store';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { Assistant } from './Assistant';
 import { Icon, ToastHost, initials } from './ui';
 
@@ -14,7 +15,7 @@ const NAV = [
 ];
 
 export default function Shell() {
-  const { state, dispatch } = useApp();
+  const { state, dispatch, refresh } = useApp();
   const navigate = useNavigate();
   const [pop, setPop] = useState<'search' | 'notif' | 'profile' | null>(null);
   const [assistOpen, setAssistOpen] = useState(false);
@@ -197,9 +198,20 @@ export default function Shell() {
               <button className="p-row" onClick={() => go('/settings')}>Workspace settings</button>
               <button className="p-row" onClick={() => go('/settings?tab=notifications')}>Notification preferences</button>
               <button className="p-row" onClick={() => { setPop(null); setAssistOpen(true); }}>Help &amp; process guide</button>
-              <button className="p-row" onClick={() => { setPop(null); dispatch({ type: 'RESET_DEMO' }); }}>Reset demo data</button>
+              <button className="p-row" onClick={() => { setPop(null); refresh(); }}>
+                {isSupabaseConfigured ? 'Refresh workspace data' : 'Reset demo data'}
+              </button>
               <hr className="divider" style={{ margin: '6px 0' }} />
-              <button className="p-row danger" onClick={() => { dispatch({ type: 'LOGOUT' }); navigate('/login'); }}>Sign out</button>
+              <button
+                className="p-row danger"
+                onClick={async () => {
+                  if (isSupabaseConfigured && supabase) await supabase.auth.signOut();
+                  else dispatch({ type: 'LOGOUT' });
+                  navigate('/login');
+                }}
+              >
+                Sign out
+              </button>
             </div>
           )}
         </header>
