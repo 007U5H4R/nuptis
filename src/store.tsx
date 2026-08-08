@@ -15,6 +15,7 @@ type Action =
   | { type: 'NOTIF_READ'; id: string }
   | { type: 'SET_STAGE'; woId: string; stage: number }
   | { type: 'ADVANCE_STAGE'; woId: string }
+  | { type: 'FLAG_ADD'; flag: Flag }
   | { type: 'ACTIVATE_BACKUP'; flagId: string; backupVendorId: string }
   | { type: 'SOURCE_BACKUP'; flagId: string; vendorId: string }
   | { type: 'APPROVE_CO'; flagId: string }
@@ -86,6 +87,22 @@ function reducer(state: AppState, action: Action): AppState {
         desc: `${wo.id} moved to stage ${next} of 8.`,
         route: `/procurement/${wo.id}`,
       });
+      return s;
+    }
+
+    case 'FLAG_ADD': {
+      let s: AppState = {
+        ...state,
+        flags: [action.flag, ...state.flags],
+        workOrders: state.workOrders.map((w) => (w.id === action.flag.woId ? { ...w, flagged: true } : w)),
+      };
+      s = pushNotif(s, {
+        tone: action.flag.severity === 'high' ? 'danger' : action.flag.severity === 'medium' ? 'warning' : 'neutral',
+        title: `Risk flagged manually — ${action.flag.label}`,
+        meta: `${action.flag.woId} · ${action.flag.title}`,
+        route: '/contingency',
+      });
+      s = pushToast(s, { tone: 'warning', title: 'Risk flag opened', desc: `${action.flag.woId} · ${action.flag.label} — sorted into the panel by severity.` });
       return s;
     }
 

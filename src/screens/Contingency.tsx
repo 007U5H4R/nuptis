@@ -1,16 +1,41 @@
 import { useState } from 'react';
 import { useApp } from '../store';
-import { Badge, Drawer, EmptyState, ImpactBlock, NextStepsBlock } from '../components/ui';
+import { Badge, Drawer, EmptyState, ImpactBlock, NextStepsBlock, SelectField, TextField } from '../components/ui';
 import { fmtINR } from '../seed';
-import type { Flag } from '../types';
+import type { Flag, FlagType, Severity } from '../types';
 
 type Open = { flag: Flag } | null;
+
+const TYPE_LABELS: Record<string, FlagType> = {
+  'Vendor no-show': 'vendor_no_show',
+  'Extra resources needed': 'extra_resources',
+  'Client scope change': 'scope_change',
+  'Post-incident reconciliation': 'reconciliation',
+};
+const FLAG_LABEL: Record<FlagType, string> = {
+  vendor_no_show: 'Vendor No-show',
+  extra_resources: 'Extra Resources',
+  scope_change: 'Scope Change',
+  reconciliation: 'Reconciliation',
+};
+const DEFAULT_SEV: Record<FlagType, Severity> = {
+  vendor_no_show: 'high',
+  extra_resources: 'medium',
+  scope_change: 'medium',
+  reconciliation: 'low',
+};
 
 export default function Contingency() {
   const { state, dispatch } = useApp();
   const [open, setOpen] = useState<Open>(null);
   const [backupChoice, setBackupChoice] = useState('v-swaad');
   const [recommend, setRecommend] = useState(true);
+  const [manual, setManual] = useState(false);
+  const [mWo, setMWo] = useState('');
+  const [mType, setMType] = useState('Vendor no-show');
+  const [mSev, setMSev] = useState<string>('High');
+  const [mTitle, setMTitle] = useState('');
+  const [mMeta, setMMeta] = useState('');
 
   const active = state.flags.filter((f) => f.status === 'open');
   const resolved = state.flags.filter((f) => f.status === 'resolved');
@@ -41,7 +66,9 @@ export default function Contingency() {
           </div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost">Log risk manually</button>
+          <button className="btn btn-ghost" onClick={() => { setMWo(state.workOrders.find((w) => !w.flagged)?.id ?? state.workOrders[0]?.id ?? ''); setManual(true); }}>
+            Log risk manually
+          </button>
         </div>
       </div>
 
@@ -187,6 +214,72 @@ export default function Contingency() {
           </div>
           <ImpactBlock rows={[['Quote delta', '₹8,40,000 → ₹10,50,000'], ['Client sign-off', 'Pending · client notified'], ['Finance', 'Auto-reprice on approval']]} />
           <NextStepsBlock items={['Amended work order sent for client e-sign', 'Finance locks revised quote ₹10,50,000', 'Reception stage updated — vendor unchanged']} />
+        </Drawer>
+      )}
+
+      {manual && (
+        <Drawer
+          title="Log risk manually"
+          desc="For anything the Day-of monitor didn’t catch automatically — venue issues, weather calls, a vendor phoning in a problem. The flag lands on this panel sorted by severity."
+          onClose={() => setManual(false)}
+          actions={
+            <>
+              <button className="btn btn-secondary" onClick={() => setManual(false)}>Cancel</button>
+              <button
+                className="btn btn-primary"
+                disabled={mTitle.trim().length < 4 || !mWo}
+                onClick={() => {
+                  const type = TYPE_LABELS[mType];
+                  dispatch({
+                    type: 'FLAG_ADD',
+                    flag: {
+                      id: 'FLG-' + Date.now(),
+                      type,
+                      severity: mSev.toLowerCase() as Severity,
+                      label: FLAG_LABEL[type],
+                      title: mTitle.trim(),
+                      meta: mMeta.trim() || `${mWo} · logged manually`,
+                      woId: mWo,
+                      opened: 'Flagged just now',
+                      status: 'open',
+                    },
+                  });
+                  setManual(false);
+                  setMTitle('');
+                  setMMeta('');
+                }}
+              >
+                Open risk flag
+              </button>
+            </>
+          }
+        >
+          <SelectField label="Work order" value={mWo} options={state.workOrders.map((w) => w.id)} onChange={setMWo} />
+          {(() => {
+            const w = state.workOrders.find((x) => x.id === mWo);
+            const v = w && state.vendors.find((x) => x.id === w.vendorId);
+            return w ? <div className="caption muted" style={{ marginTop: -8 }}>{w.ceremony} · {v?.name} · stage {w.stage}/8</div> : null;
+          })()}
+          <SelectField
+            label="Trigger type"
+            value={mType}
+            options={Object.keys(TYPE_LABELS)}
+            onChange={(v) => {
+              setMType(v);
+              const sev = DEFAULT_SEV[TYPE_LABELS[v]];
+              setMSev(sev.charAt(0).toUpperCase() + sev.slice(1));
+            }}
+          />
+          <SelectField label="Severity" value={mSev} options={['High', 'Medium', 'Low']} onChange={setMSev} />
+          <TextField label="What happened?" value={mTitle} onChange={setMTitle} placeholder="e.g. Generator failure risk at outdoor mandap — Sharma × Mehta" />
+          <TextField label="Details (optional)" value={mMeta} onChange={setMMeta} placeholder="Context the responder needs — counts, timings, who reported it" />
+          <NextStepsBlock
+            items={[
+              'Flag opens on this panel, sorted by severity then event proximity',
+              'The work order is marked contingency-flagged on the Procurement Board',
+              'High-severity flags alert the whole team instantly — that alert cannot be muted',
+            ]}
+          />
         </Drawer>
       )}
 
