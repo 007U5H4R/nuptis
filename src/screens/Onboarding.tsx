@@ -61,7 +61,7 @@ export default function Onboarding() {
         </div>
       </div>
 
-      <StageStepper labels={STEPS} current={d.step} onJump={(n) => n < d.step && set({ step: n })} />
+      <StageStepper labels={STEPS} current={d.step} clickableUpTo={d.step} onJump={(n) => n < d.step && set({ step: n })} />
 
       <div className="stage-grid">
         <div className="card stack" style={{ gap: 14 }}>

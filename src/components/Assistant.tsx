@@ -42,7 +42,7 @@ function answer(q: string): Msg {
     return {
       role: 'bot',
       text:
-        'Every work order moves through 8 stages: Requirements → Shortlist → Quote & Negotiation → Booking → Pre-Event → Payments → Day-Of → Settlement. Only the current stage’s action advances it; stages resolved via the Contingency Panel carry an amber corner flag.',
+        'Every work order moves through 8 stages: Requirements → Shortlist → Quote & Negotiation → Booking → Pre-Event → Payments → Execution → Settlement. Only “Mark stage complete” advances a work order — upcoming stages stay locked; stages resolved via the Contingency Panel carry an amber ⚑.',
       action: { label: 'Open Procurement Board →', route: '/procurement' },
     };
   }

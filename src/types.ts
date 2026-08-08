@@ -32,7 +32,7 @@ export const STAGES = [
   'Booking',
   'Pre-Event',
   'Payments',
-  'Day-Of',
+  'Execution',
   'Settlement',
 ] as const;
 

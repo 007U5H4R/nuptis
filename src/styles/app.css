@@ -261,12 +261,10 @@ a { color: var(--link); text-decoration: none; }
 .seg:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%); border-radius: 0 6px 6px 0; }
 .seg.done { background: var(--step-done); color: var(--step-done-label); }
 .seg.current { background: var(--step-current); color: var(--step-current-label); font-weight: 600; }
-.seg .flag {
-  position: absolute; top: 0; right: 8px;
-  width: 0; height: 0;
-  border-left: 10px solid transparent;
-  border-top: 10px solid var(--step-flag);
-}
+.seg.locked { cursor: not-allowed; }
+.seg:not(.locked):hover { filter: brightness(0.97); }
+.seg.viewing .seg-label { text-decoration: underline; text-underline-offset: 3px; }
+.seg-flag { color: var(--step-flag); font-size: 12px; line-height: 1; }
 .mini-stepper { display: inline-flex; gap: 2px; }
 .mini-cell { width: 13px; height: 6px; border-radius: 2px; background: var(--step-upcoming); }
 .mini-cell.done { background: var(--step-done); }
