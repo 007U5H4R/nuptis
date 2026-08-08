@@ -72,6 +72,7 @@
 
   --glass-bg: rgba(255, 255, 255, 0.78);
   --glass-strong: rgba(255, 255, 255, 0.9);
+  --pop-bg: rgba(255, 255, 255, 0.99);
   --glass-border: rgba(255, 255, 255, 0.85);
   --card-border: #e4e7ec;
   --scrim: rgba(16, 24, 40, 0.45);
@@ -142,6 +143,7 @@
 
   --glass-bg: rgba(18, 26, 44, 0.78);
   --glass-strong: rgba(20, 28, 46, 0.92);
+  --pop-bg: rgba(19, 27, 45, 0.99);
   --glass-border: rgba(255, 255, 255, 0.14);
   --card-border: rgba(255, 255, 255, 0.1);
   --scrim: rgba(4, 8, 18, 0.62);

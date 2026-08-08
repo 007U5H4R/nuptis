@@ -465,9 +465,11 @@ a { color: var(--link); text-decoration: none; }
 .pop-scrim { position: fixed; inset: 0; z-index: 40; }
 .search-pop, .notif-pop, .profile-pop {
   position: absolute; z-index: 45;
-  background: var(--glass-strong);
-  backdrop-filter: blur(28px);
-  border: 1px solid var(--glass-border);
+  /* Near-opaque on purpose: these live inside the topbar, whose own
+     backdrop-filter disables nested backdrop blur in Chromium — translucent
+     glass here lets page text bleed through un-blurred. */
+  background: var(--pop-bg);
+  border: 1px solid var(--card-border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-modal);
   animation: fadeIn 0.12s ease;
