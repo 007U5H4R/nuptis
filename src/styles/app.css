@@ -250,13 +250,15 @@ a { color: var(--link); text-decoration: none; }
 /* ============ stage stepper (Salesforce Path style) ============ */
 .stepper { display: flex; gap: 3px; margin: 4px 0 18px; }
 .seg {
-  flex: 1; height: 34px;
-  display: flex; align-items: center; justify-content: center; gap: 6px;
+  flex: 1; min-width: 0; height: 34px;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 0 18px;
   font-size: 11.5px; font-weight: 500;
   border: 0; position: relative;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
   background: var(--step-upcoming); color: var(--step-upcoming-label);
 }
+.seg-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .seg:first-child { clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%); border-radius: 6px 0 0 6px; }
 .seg:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%); border-radius: 0 6px 6px 0; }
 .seg.done { background: var(--step-done); color: var(--step-done-label); }
