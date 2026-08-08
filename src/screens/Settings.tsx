@@ -90,7 +90,7 @@ export default function SettingsScreen() {
           <div className="col">
             <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
               <div className="hstack" style={{ padding: '16px 20px 12px' }}>
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="card-title" style={{ marginBottom: 2 }}>Team &amp; roles</div>
                   <div className="caption muted">Roles gate what each member can approve — Finance signs off settlements, Vendor Managers own the roster.</div>
                 </div>
@@ -118,9 +118,11 @@ export default function SettingsScreen() {
           <div className="col">
             <div className="card stack" style={{ gap: 10 }}>
               <div className="card-title">Roles &amp; permissions</div>
-              <div className="role-row"><Badge tone="neutral" label="Owner" /><span className="desc">Full access — billing, danger zone, every approval</span></div>
-              <div className="role-row"><Badge tone="neutral" label="Vendor Manager" /><span className="desc">Runs weddings, onboarding and procurement day-to-day</span></div>
-              <div className="role-row"><Badge tone="neutral" label="Finance" /><span className="desc">Signs settlements, payouts and penalty invocations</span></div>
+              <div className="roles-grid">
+                <Badge tone="neutral" label="Owner" /><span className="desc">Full access — billing, danger zone, every approval</span>
+                <Badge tone="neutral" label="Vendor Manager" /><span className="desc">Runs weddings, onboarding and procurement day-to-day</span>
+                <Badge tone="neutral" label="Finance" /><span className="desc">Signs settlements, payouts and penalty invocations</span>
+              </div>
             </div>
             <div className="card stack" style={{ gap: 10 }}>
               <div className="card-title">Pending invites</div>

@@ -176,6 +176,7 @@ a { color: var(--link); text-decoration: none; }
   border-radius: var(--radius-md);
   font-weight: 500; font-size: 13.5px;
   border: 1px solid transparent;
+  white-space: nowrap; flex-shrink: 0;
   transition: background 0.12s ease;
 }
 .btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
@@ -344,7 +345,7 @@ a { color: var(--link); text-decoration: none; }
 .amber-note { background: var(--warning-bg); color: var(--warning-text); border-radius: var(--radius-lg); padding: 11px 13px; font-size: 12.5px; }
 
 /* ============ toasts ============ */
-.toast-host { position: fixed; right: 24px; bottom: 104px; z-index: 90; display: flex; flex-direction: column; gap: 10px; }
+.toast-host { position: fixed; right: 24px; bottom: 92px; z-index: 90; display: flex; flex-direction: column; gap: 10px; }
 .toast {
   width: 300px;
   background: var(--glass-strong);
@@ -369,18 +370,24 @@ a { color: var(--link); text-decoration: none; }
 /* ============ aurora orb + assistant ============ */
 .orb {
   position: fixed; right: 24px; bottom: 24px; z-index: 80;
-  width: 64px; height: 64px; border-radius: 50%;
-  border: 0; padding: 0;
-  background: radial-gradient(circle at 38% 32%, #4fc3f7 0%, #2d5ba8 52%, #0a1a38 100%);
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 0; padding: 0; margin: 0;
+  appearance: none; -webkit-appearance: none; outline: none;
+  background: radial-gradient(circle at 38% 32%, #4fc3f7 0%, #2d5ba8 55%, #0a1a38 100%);
+  background-clip: padding-box;
   box-shadow:
-    0 6px 20px rgba(45, 91, 168, 0.45),
-    0 0 26px 2px rgba(79, 195, 247, 0.32);
-  overflow: hidden;
+    0 6px 16px rgba(45, 91, 168, 0.4),
+    0 0 18px 1px rgba(79, 195, 247, 0.3);
+  cursor: pointer;
   transition: transform 0.15s ease;
 }
 .orb:hover { transform: scale(1.06); }
+.orb:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+/* Swirl + core are sized and clipped to the button's own circle (no ancestor
+   overflow:hidden) — an inset/overflow combo here bled a squarish patch past
+   the circle in some renderers. Each layer clips itself via its own radius. */
 .orb::before {
-  content: ''; position: absolute; inset: -8px;
+  content: ''; position: absolute; inset: 0;
   border-radius: 50%;
   background: conic-gradient(
     from 0deg,
@@ -393,14 +400,14 @@ a { color: var(--link); text-decoration: none; }
     rgba(79, 195, 247, 0) 100%
   );
   mix-blend-mode: screen;
-  filter: blur(6px);
+  filter: blur(3px);
   animation: orbspin 8s linear infinite;
 }
 .orb::after {
-  content: ''; position: absolute; left: 22px; top: 22px;
-  width: 20px; height: 20px; border-radius: 50%;
+  content: ''; position: absolute; left: 17px; top: 17px;
+  width: 18px; height: 18px; border-radius: 50%;
   background: #a5f3fc;
-  filter: blur(9px);
+  filter: blur(7px);
   animation: orbpulse 4s ease-in-out infinite;
 }
 @keyframes orbspin { to { transform: rotate(360deg); } }
@@ -538,8 +545,8 @@ a { color: var(--link); text-decoration: none; }
 /* ============ settings ============ */
 .grid-2 { display: grid; grid-template-columns: 1fr 400px; gap: 16px; align-items: start; }
 .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.role-row { display: flex; gap: 10px; align-items: baseline; font-size: 12.5px; }
-.role-row .desc { color: var(--muted); }
+.roles-grid { display: grid; grid-template-columns: max-content 1fr; column-gap: 10px; row-gap: 9px; align-items: start; font-size: 12.5px; }
+.roles-grid .desc { color: var(--muted); line-height: 1.4; padding-top: 2px; }
 .kv { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
 .kv:last-child { border-bottom: 0; }
 .kv .k { color: var(--muted); }
