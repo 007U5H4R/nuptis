@@ -36,6 +36,38 @@ export const STAGES = [
   'Settlement',
 ] as const;
 
+/** Per-stage editable data captured on the Work Order Detail screens (Figma: Screens 9-16).
+ *  One flat bag rather than 8 separate tables — mirrors how the drawer forms already work. */
+export interface WorkOrderDetails {
+  // Stage 1 — Requirement Definition
+  guestCount?: string;
+  budgetBand?: string;
+  mustHaves?: string;
+  // Stage 2 — Vendor Shortlisting
+  shortlist?: string[]; // vendor ids, from the live roster
+  sharedWithClient?: boolean;
+  // Stage 3 — Quote & Negotiation
+  negotiationNotes?: string;
+  quoteLocked?: boolean;
+  // Stage 4 — Booking & Work Order
+  advancePct?: string;
+  workOrderIssued?: boolean;
+  // Stage 5 — Pre-Event Coordination
+  tastingApproved?: boolean;
+  runOfShow?: string; // attachment reference (mock — no file upload in this build)
+  loadIn?: string;
+  loadOut?: string;
+  // Stage 7 — Day-of Execution
+  vendorArrived?: boolean;
+  setupConfirmed?: boolean;
+  photoProof?: boolean;
+  executionNote?: string;
+  // Stage 8 — Final Settlement
+  vendorRating?: string; // '1'..'5'
+  performanceNote?: string;
+  closed?: boolean;
+}
+
 export interface WorkOrder {
   id: string; // WO-2041
   weddingId: string;
@@ -47,6 +79,7 @@ export interface WorkOrder {
   flagged?: boolean;
   contingencyResolvedStage?: number; // stage completed via contingency (amber flag)
   note?: string;
+  details: WorkOrderDetails;
 }
 
 export type FlagType = 'vendor_no_show' | 'extra_resources' | 'scope_change' | 'reconciliation';

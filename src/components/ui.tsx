@@ -87,20 +87,20 @@ export function Badge({ label, tone }: { label: string; tone?: 'success' | 'warn
 }
 
 /* ---------- fields ---------- */
-export function TextField(props: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: string }) {
+export function TextField(props: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: string; disabled?: boolean }) {
   return (
     <div className="field">
       <label>{props.label}</label>
-      <input type={props.type ?? 'text'} value={props.value} placeholder={props.placeholder} onChange={(e) => props.onChange(e.target.value)} />
+      <input type={props.type ?? 'text'} value={props.value} placeholder={props.placeholder} disabled={props.disabled} onChange={(e) => props.onChange(e.target.value)} />
       {props.error && <span className="err">{props.error}</span>}
     </div>
   );
 }
-export function SelectField(props: { label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+export function SelectField(props: { label: string; value: string; onChange: (v: string) => void; options: string[]; disabled?: boolean }) {
   return (
     <div className="field">
       <label>{props.label}</label>
-      <select value={props.value} onChange={(e) => props.onChange(e.target.value)}>
+      <select value={props.value} disabled={props.disabled} onChange={(e) => props.onChange(e.target.value)}>
         {props.options.map((o) => (
           <option key={o} value={o}>{o}</option>
         ))}

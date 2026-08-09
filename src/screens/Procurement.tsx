@@ -44,7 +44,7 @@ export default function Procurement() {
     const id = nextWoId();
     dispatch({
       type: 'WO_ADD',
-      wo: { id, weddingId, ceremony: ceremony.trim(), vendorId: vendor.id, category, stage: 1, quote: quoteNum },
+      wo: { id, weddingId, ceremony: ceremony.trim(), vendorId: vendor.id, category, stage: 1, quote: quoteNum, details: {} },
     });
     setOpen(false);
     navigate(`/procurement/${id}`);

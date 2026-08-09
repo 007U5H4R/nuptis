@@ -22,6 +22,7 @@ const mapWedding = (r: any): Wedding => ({ id: r.id, couple: r.couple, ceremonie
 const mapWorkOrder = (r: any): WorkOrder => ({
   id: r.id, weddingId: r.wedding_id, ceremony: r.ceremony, vendorId: r.vendor_id, category: r.category, stage: r.stage,
   quote: Number(r.quote), flagged: r.flagged, contingencyResolvedStage: r.contingency_resolved_stage ?? undefined, note: r.note ?? undefined,
+  details: r.details ?? {},
 });
 const mapFlag = (r: any): Flag => ({
   id: r.id, type: r.type, severity: r.severity, label: r.label, title: r.title, meta: r.meta, woId: r.wo_id, opened: r.opened, status: r.status,
@@ -92,13 +93,33 @@ export async function cloudInsertWedding(w: Wedding) {
 export async function cloudInsertWorkOrder(wo: WorkOrder) {
   const { error } = await client().from('work_orders').insert({
     id: wo.id, wedding_id: wo.weddingId, ceremony: wo.ceremony, vendor_id: wo.vendorId, category: wo.category,
-    stage: wo.stage, quote: wo.quote, flagged: wo.flagged ?? false, note: wo.note ?? null,
+    stage: wo.stage, quote: wo.quote, flagged: wo.flagged ?? false, note: wo.note ?? null, details: wo.details ?? {},
   });
   if (error) throw error;
 }
 
 export async function cloudSetStage(woId: string, stage: number) {
   const { error } = await client().from('work_orders').update({ stage }).eq('id', woId);
+  if (error) throw error;
+}
+
+export async function cloudSetWorkOrderQuote(woId: string, quote: number) {
+  const { error } = await client().from('work_orders').update({ quote }).eq('id', woId);
+  if (error) throw error;
+}
+
+/** Merge-patches the work order's `details` jsonb column — same read-merge-write shape as patchSettingsJson below. */
+export async function cloudSetWorkOrderDetails(woId: string, patch: Record<string, unknown>) {
+  const db = client();
+  const { data, error } = await db.from('work_orders').select('details').eq('id', woId).single();
+  if (error) throw error;
+  const merged = { ...(data?.details ?? {}), ...patch };
+  const { error: upErr } = await db.from('work_orders').update({ details: merged }).eq('id', woId);
+  if (upErr) throw upErr;
+}
+
+export async function cloudInsertMilestone(m: Milestone) {
+  const { error } = await client().from('milestones').insert({ id: m.id, wo_id: m.woId, label: m.label, amount: m.amount, due: m.due, status: m.status });
   if (error) throw error;
 }
 

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
-import type { AppState, Flag, Invite, Notification, OnboardingDraft, Session, Settings, Theme, Toast, Vendor, Wedding, WorkOrder } from './types';
+import type { AppState, Flag, Invite, Milestone, Notification, OnboardingDraft, Session, Settings, Theme, Toast, Vendor, Wedding, WorkOrder, WorkOrderDetails } from './types';
 import { emptyDraft, seedState } from './seed';
 import { isSupabaseConfigured, supabase } from './lib/supabase';
 import * as cloud from './lib/cloud';
@@ -18,6 +18,9 @@ type Action =
   | { type: 'NOTIF_READ'; id: string }
   | { type: 'SET_STAGE'; woId: string; stage: number }
   | { type: 'ADVANCE_STAGE'; woId: string }
+  | { type: 'WO_DETAILS_SET'; woId: string; patch: Partial<WorkOrderDetails> }
+  | { type: 'WO_QUOTE_SET'; woId: string; quote: number }
+  | { type: 'MILESTONE_ADD'; milestone: Milestone }
   | { type: 'FLAG_ADD'; flag: Flag }
   | { type: 'ACTIVATE_BACKUP'; flagId: string; backupVendorId: string }
   | { type: 'SOURCE_BACKUP'; flagId: string; vendorId: string }
@@ -98,6 +101,19 @@ function reducer(state: AppState, action: Action): AppState {
       return s;
     }
 
+    case 'WO_DETAILS_SET':
+      return {
+        ...state,
+        workOrders: state.workOrders.map((w) => (w.id === action.woId ? { ...w, details: { ...w.details, ...action.patch } } : w)),
+      };
+    case 'WO_QUOTE_SET':
+      return {
+        ...state,
+        workOrders: state.workOrders.map((w) => (w.id === action.woId ? { ...w, quote: action.quote } : w)),
+      };
+    case 'MILESTONE_ADD':
+      return { ...state, milestones: [...state.milestones, action.milestone] };
+
     case 'FLAG_ADD': {
       let s: AppState = {
         ...state,
@@ -154,6 +170,7 @@ function reducer(state: AppState, action: Action): AppState {
             stage: 4,
             quote: 120000,
             note: 'Addendum work order — adds capacity, does not replace the original vendor',
+            details: {},
           },
         ],
       };
@@ -265,6 +282,9 @@ async function syncAction(action: Action): Promise<void> {
   switch (action.type) {
     case 'SET_STAGE': return cloud.cloudSetStage(action.woId, action.stage);
     case 'ADVANCE_STAGE': return cloud.cloudAdvanceStage(action.woId);
+    case 'WO_DETAILS_SET': return cloud.cloudSetWorkOrderDetails(action.woId, action.patch);
+    case 'WO_QUOTE_SET': return cloud.cloudSetWorkOrderQuote(action.woId, action.quote);
+    case 'MILESTONE_ADD': return cloud.cloudInsertMilestone(action.milestone);
     case 'FLAG_ADD': return cloud.cloudAddManualFlag(action.flag);
     case 'ACTIVATE_BACKUP': return cloud.cloudActivateBackup(action.flagId, action.backupVendorId);
     case 'SOURCE_BACKUP': return cloud.cloudSourceBackup(action.flagId, action.vendorId);

@@ -64,6 +64,7 @@ create table work_orders (
   flagged                   boolean not null default false,
   contingency_resolved_stage integer,
   note                      text,
+  details                   jsonb not null default '{}'::jsonb, -- per-stage editable fields (Key Fields panel, Screens 9-16)
   created_at                timestamptz not null default now()
 );
 
@@ -342,14 +343,20 @@ insert into weddings (id, couple, ceremonies, month, budget, status) values
   ('w-kapoor-singh','Kapoor × Singh',3,'Dec 2026','₹42,00,000','Planning'),
   ('w-rao-iyer','Rao × Iyer',4,'Oct 2026','₹51,00,000','Wrapped');
 
-insert into work_orders (id, wedding_id, ceremony, vendor_id, category, stage, quote, flagged, contingency_resolved_stage, note) values
-  ('WO-2041','w-sharma-mehta','Sangeet','v-annapurna','Caterer',6,840000,true,null,'350 guests · locked quote · 13 Nov'),
-  ('WO-2051','w-kapoor-singh','Mehndi','v-rangoli','Decor',5,180000,true,null,'At capacity — 2 extra flower walls requested'),
-  ('WO-2052','w-kapoor-singh','Reception','v-rasoi','Caterer',3,840000,true,null,'Client change order awaiting sign-off · quote delta +₹2.1L'),
-  ('WO-2019','w-rao-iyer','Reception','v-swaad','Caterer',8,500000,true,7,'Backup activation closed 28 Oct — reconciliation pending'),
-  ('WO-2033','w-sharma-mehta','Wedding Day','v-lumiere','Photography',4,320000,false,null,null),
-  ('WO-2036','w-sharma-mehta','Haldi','v-pandit','Priest / Rituals',2,45000,false,null,null),
-  ('WO-2044','w-kapoor-singh','Baraat','v-shaadi-wheels','Transport',1,120000,false,null,null);
+insert into work_orders (id, wedding_id, ceremony, vendor_id, category, stage, quote, flagged, contingency_resolved_stage, note, details) values
+  ('WO-2041','w-sharma-mehta','Sangeet','v-annapurna','Caterer',6,840000,true,null,'350 guests · locked quote · 13 Nov',
+    '{"guestCount":"350","budgetBand":"₹8L–12L","mustHaves":"Live counters ×4, vegetarian + Jain menu, buffet by 7pm","shortlist":["v-annapurna","v-rasoi"],"sharedWithClient":true,"negotiationNotes":"Locked at rate card — no discount requested.","quoteLocked":true,"advancePct":"30%","workOrderIssued":true,"tastingApproved":true,"runOfShow":"Sangeet-RunOfShow.pdf","loadIn":"4:00 PM","loadOut":"11:30 PM"}'::jsonb),
+  ('WO-2051','w-kapoor-singh','Mehndi','v-rangoli','Decor',5,180000,true,null,'At capacity — 2 extra flower walls requested',
+    '{"guestCount":"220","budgetBand":"₹1.5L–2L","mustHaves":"Marigold mandap backdrop, 2 flower walls, fairy-light canopy","shortlist":["v-rangoli","v-saanjh"],"sharedWithClient":true,"negotiationNotes":"Approved at rate card.","quoteLocked":true,"advancePct":"30%","workOrderIssued":true}'::jsonb),
+  ('WO-2052','w-kapoor-singh','Reception','v-rasoi','Caterer',3,840000,true,null,'Client change order awaiting sign-off · quote delta +₹2.1L',
+    '{"guestCount":"350","budgetBand":"₹8L–12L","mustHaves":"4 live counters, dessert bar","shortlist":["v-rasoi","v-annapurna"],"sharedWithClient":true,"negotiationNotes":"Awaiting change-order sign-off — guest count +150 pending."}'::jsonb),
+  ('WO-2019','w-rao-iyer','Reception','v-swaad','Caterer',8,500000,true,7,'Backup activation closed 28 Oct — reconciliation pending',
+    '{"guestCount":"400","budgetBand":"₹5L–8L","mustHaves":"Simple buffet, no live counters (reduced backup scope)","shortlist":["v-swaad"],"sharedWithClient":true,"negotiationNotes":"Backup activation — rate fit 92% vs Annapurna.","quoteLocked":true,"advancePct":"30%","workOrderIssued":true,"tastingApproved":true,"runOfShow":"Reception-RunOfShow.pdf","loadIn":"5:00 PM","loadOut":"11:00 PM","vendorArrived":true,"setupConfirmed":true,"photoProof":true,"executionNote":"Delivered full scope on schedule — no client complaints."}'::jsonb),
+  ('WO-2033','w-sharma-mehta','Wedding Day','v-lumiere','Photography',4,320000,false,null,null,
+    '{"guestCount":"500","budgetBand":"₹2.5L–3.5L","mustHaves":"Candid + traditional coverage, drone shots, same-day highlight reel","shortlist":["v-lumiere"],"sharedWithClient":true,"negotiationNotes":"Package locked, no add-ons.","quoteLocked":true,"advancePct":"30%"}'::jsonb),
+  ('WO-2036','w-sharma-mehta','Haldi','v-pandit','Priest / Rituals',2,45000,false,null,null,
+    '{"guestCount":"150","budgetBand":"Under ₹1L","mustHaves":"Havan samagri included, 90-minute ceremony window"}'::jsonb),
+  ('WO-2044','w-kapoor-singh','Baraat','v-shaadi-wheels','Transport',1,120000,false,null,null,'{}'::jsonb);
 
 insert into flags (id, type, severity, label, title, meta, wo_id, opened, status) values
   ('FLG-1','vendor_no_show','high','Vendor No-show','Caterer unreachable — Sharma × Mehta, Sangeet (Nov 14)','Work order WO-2041 · Annapurna Caterers · 2 backup vendors available','WO-2041','Flagged 22 min ago','open'),

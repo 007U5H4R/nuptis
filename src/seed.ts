@@ -56,13 +56,61 @@ export function seedState(): AppState {
       { id: 'w-rao-iyer', couple: 'Rao × Iyer', ceremonies: 4, month: 'Oct 2026', budget: '₹51,00,000', status: 'Wrapped' },
     ],
     workOrders: [
-      { id: 'WO-2041', weddingId: 'w-sharma-mehta', ceremony: 'Sangeet', vendorId: 'v-annapurna', category: 'Caterer', stage: 6, quote: 840000, flagged: true, note: '350 guests · locked quote · 13 Nov' },
-      { id: 'WO-2051', weddingId: 'w-kapoor-singh', ceremony: 'Mehndi', vendorId: 'v-rangoli', category: 'Decor', stage: 5, quote: 180000, flagged: true, note: 'At capacity — 2 extra flower walls requested' },
-      { id: 'WO-2052', weddingId: 'w-kapoor-singh', ceremony: 'Reception', vendorId: 'v-rasoi', category: 'Caterer', stage: 3, quote: 840000, flagged: true, note: 'Client change order awaiting sign-off · quote delta +₹2.1L' },
-      { id: 'WO-2019', weddingId: 'w-rao-iyer', ceremony: 'Reception', vendorId: 'v-swaad', category: 'Caterer', stage: 8, quote: 500000, flagged: true, contingencyResolvedStage: 7, note: 'Backup activation closed 28 Oct — reconciliation pending' },
-      { id: 'WO-2033', weddingId: 'w-sharma-mehta', ceremony: 'Wedding Day', vendorId: 'v-lumiere', category: 'Photography', stage: 4, quote: 320000 },
-      { id: 'WO-2036', weddingId: 'w-sharma-mehta', ceremony: 'Haldi', vendorId: 'v-pandit', category: 'Priest / Rituals', stage: 2, quote: 45000 },
-      { id: 'WO-2044', weddingId: 'w-kapoor-singh', ceremony: 'Baraat', vendorId: 'v-shaadi-wheels', category: 'Transport', stage: 1, quote: 120000 },
+      {
+        id: 'WO-2041', weddingId: 'w-sharma-mehta', ceremony: 'Sangeet', vendorId: 'v-annapurna', category: 'Caterer', stage: 6, quote: 840000, flagged: true, note: '350 guests · locked quote · 13 Nov',
+        details: {
+          guestCount: '350', budgetBand: '₹8L–12L', mustHaves: 'Live counters ×4, vegetarian + Jain menu, buffet by 7pm',
+          shortlist: ['v-annapurna', 'v-rasoi'], sharedWithClient: true,
+          negotiationNotes: 'Locked at rate card — no discount requested.', quoteLocked: true,
+          advancePct: '30%', workOrderIssued: true,
+          tastingApproved: true, runOfShow: 'Sangeet-RunOfShow.pdf', loadIn: '4:00 PM', loadOut: '11:30 PM',
+        },
+      },
+      {
+        id: 'WO-2051', weddingId: 'w-kapoor-singh', ceremony: 'Mehndi', vendorId: 'v-rangoli', category: 'Decor', stage: 5, quote: 180000, flagged: true, note: 'At capacity — 2 extra flower walls requested',
+        details: {
+          guestCount: '220', budgetBand: '₹1.5L–2L', mustHaves: 'Marigold mandap backdrop, 2 flower walls, fairy-light canopy',
+          shortlist: ['v-rangoli', 'v-saanjh'], sharedWithClient: true,
+          negotiationNotes: 'Approved at rate card.', quoteLocked: true,
+          advancePct: '30%', workOrderIssued: true,
+        },
+      },
+      {
+        id: 'WO-2052', weddingId: 'w-kapoor-singh', ceremony: 'Reception', vendorId: 'v-rasoi', category: 'Caterer', stage: 3, quote: 840000, flagged: true, note: 'Client change order awaiting sign-off · quote delta +₹2.1L',
+        details: {
+          guestCount: '350', budgetBand: '₹8L–12L', mustHaves: '4 live counters, dessert bar',
+          shortlist: ['v-rasoi', 'v-annapurna'], sharedWithClient: true,
+          negotiationNotes: 'Awaiting change-order sign-off — guest count +150 pending.',
+        },
+      },
+      {
+        id: 'WO-2019', weddingId: 'w-rao-iyer', ceremony: 'Reception', vendorId: 'v-swaad', category: 'Caterer', stage: 8, quote: 500000, flagged: true, contingencyResolvedStage: 7, note: 'Backup activation closed 28 Oct — reconciliation pending',
+        details: {
+          guestCount: '400', budgetBand: '₹5L–8L', mustHaves: 'Simple buffet, no live counters (reduced backup scope)',
+          shortlist: ['v-swaad'], sharedWithClient: true,
+          negotiationNotes: 'Backup activation — rate fit 92% vs Annapurna.', quoteLocked: true,
+          advancePct: '30%', workOrderIssued: true,
+          tastingApproved: true, runOfShow: 'Reception-RunOfShow.pdf', loadIn: '5:00 PM', loadOut: '11:00 PM',
+          vendorArrived: true, setupConfirmed: true, photoProof: true, executionNote: 'Delivered full scope on schedule — no client complaints.',
+        },
+      },
+      {
+        id: 'WO-2033', weddingId: 'w-sharma-mehta', ceremony: 'Wedding Day', vendorId: 'v-lumiere', category: 'Photography', stage: 4, quote: 320000,
+        details: {
+          guestCount: '500', budgetBand: '₹2.5L–3.5L', mustHaves: 'Candid + traditional coverage, drone shots, same-day highlight reel',
+          shortlist: ['v-lumiere'], sharedWithClient: true,
+          negotiationNotes: 'Package locked, no add-ons.', quoteLocked: true,
+          advancePct: '30%',
+        },
+      },
+      {
+        id: 'WO-2036', weddingId: 'w-sharma-mehta', ceremony: 'Haldi', vendorId: 'v-pandit', category: 'Priest / Rituals', stage: 2, quote: 45000,
+        details: { guestCount: '150', budgetBand: 'Under ₹1L', mustHaves: 'Havan samagri included, 90-minute ceremony window' },
+      },
+      {
+        id: 'WO-2044', weddingId: 'w-kapoor-singh', ceremony: 'Baraat', vendorId: 'v-shaadi-wheels', category: 'Transport', stage: 1, quote: 120000,
+        details: {},
+      },
     ],
     flags: [
       { id: 'FLG-1', type: 'vendor_no_show', severity: 'high', label: 'Vendor No-show', title: 'Caterer unreachable — Sharma × Mehta, Sangeet (Nov 14)', meta: 'Work order WO-2041 · Annapurna Caterers · 2 backup vendors available', woId: 'WO-2041', opened: 'Flagged 22 min ago', status: 'open' },
