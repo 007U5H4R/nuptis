@@ -11,7 +11,7 @@ export default function Payments() {
       <div className="page-head">
         <h1 className="page-title">Payment Tracker</h1>
       </div>
-      <div className="kpi-row" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+      <div className="kpi-row kpi-3">
         <div className="card kpi"><div className="kpi-label">Collected</div><div className="kpi-value">{fmtINR(sum((s) => s === 'paid'))}</div><div className="kpi-sub">across all work orders</div></div>
         <div className="card kpi"><div className="kpi-label">Due</div><div className="kpi-value">{fmtINR(sum((s) => s === 'due'))}</div><div className="kpi-sub">this week</div></div>
         <div className="card kpi"><div className="kpi-label">Overdue / disputed</div><div className="kpi-value" style={{ color: 'var(--danger-text)' }}>{fmtINR(sum((s) => s === 'overdue'))}</div><div className="kpi-sub">needs Finance sign-off</div></div>

@@ -122,6 +122,7 @@ a { color: var(--link); text-decoration: none; }
 .card-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
 .card-sub { color: var(--muted); font-size: 12.5px; margin-bottom: 14px; }
 .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 16px; }
+.kpi-row.kpi-3 { grid-template-columns: repeat(3, 1fr); }
 .kpi { padding: 16px 18px; }
 .kpi-label { font-size: 11px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); }
 .kpi-value { font-size: 24px; font-weight: 600; margin: 4px 0 2px; }
@@ -601,7 +602,7 @@ a { color: var(--link); text-decoration: none; }
   .profile-pop { right: 12px; width: min(280px, calc(100vw - 24px)); }
 
   /* single-column KPIs + tighter content padding */
-  .kpi-row { grid-template-columns: 1fr; }
+  .kpi-row, .kpi-row.kpi-3 { grid-template-columns: 1fr; }
   .content { padding: 16px; }
   .page-title { font-size: 18px; }
 
