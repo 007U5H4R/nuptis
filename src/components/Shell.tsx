@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../store';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { Assistant } from './Assistant';
@@ -17,6 +17,8 @@ const NAV = [
 export default function Shell() {
   const { state, dispatch, refresh } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
   const [pop, setPop] = useState<'search' | 'notif' | 'profile' | null>(null);
   const [assistOpen, setAssistOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -27,11 +29,13 @@ export default function Shell() {
         e.preventDefault();
         setPop((p) => (p === 'search' ? null : 'search'));
       }
-      if (e.key === 'Escape') setPop(null);
+      if (e.key === 'Escape') { setPop(null); setNavOpen(false); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  useEffect(() => { setNavOpen(false); }, [location.pathname]);
 
   const unread = state.notifications.some((n) => !n.read);
 
@@ -51,7 +55,7 @@ export default function Shell() {
   };
 
   return (
-    <div className="shell">
+    <div className={`shell ${navOpen ? 'nav-open' : ''}`}>
       <aside className="sidebar">
         <div className="side-brand">NUPTIS</div>
         <nav className="side-nav">
@@ -70,8 +74,13 @@ export default function Shell() {
         </div>
       </aside>
 
+      {navOpen && <div className="nav-scrim" onClick={() => setNavOpen(false)} />}
+
       <div className="main">
         <header className="topbar">
+          <button className="tb-hamburger" onClick={() => setNavOpen(true)} aria-label="Open navigation">
+            <Icon name="menu" size={18} />
+          </button>
           <button className="tb-search" onClick={() => setPop(pop === 'search' ? null : 'search')}>
             <Icon name="search" size={14} />
             <span style={{ flex: 1, textAlign: 'left' }}>Search vendors, weddings, work orders…</span>
