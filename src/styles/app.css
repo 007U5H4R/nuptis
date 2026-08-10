@@ -635,4 +635,8 @@ a { color: var(--link); text-decoration: none; }
   /* action / chevron / empty cells: no label, full width */
   .table tbody tr td[data-label=""]::before { content: none; }
   .table tbody tr td[data-label=""] { justify-content: flex-end; }
+  /* an action cell with no content (e.g. a paid milestone) collapses away */
+  .table tbody tr td[data-label=""]:empty { display: none; }
+  /* full-width empty-state row (colSpan) stays centered */
+  .table tbody tr td.empty-cell { justify-content: center; }
 }

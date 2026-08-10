@@ -105,7 +105,7 @@ export default function Dashboard() {
                 </tr>
               ))}
               {vendors.length === 0 && (
-                <tr><td colSpan={7} data-label="" className="muted" style={{ textAlign: 'center', padding: 28 }}>No vendors match the current filters.</td></tr>
+                <tr><td colSpan={7} data-label="" className="muted empty-cell" style={{ textAlign: 'center', padding: 28 }}>No vendors match the current filters.</td></tr>
               )}
             </tbody>
           </table>
