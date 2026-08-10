@@ -73,26 +73,26 @@ export default function Procurement() {
               const wedding = state.weddings.find((x) => x.id === w.weddingId);
               return (
                 <tr key={w.id} className="clickable" onClick={() => navigate(`/procurement/${w.id}`)}>
-                  <td>
+                  <td data-label="Work order">
                     <div className="cell-main">{w.id}</div>
                     {w.note && <div className="cell-sub">{w.note}</div>}
                   </td>
-                  <td>
+                  <td data-label="Wedding · ceremony">
                     <div>{wedding?.couple}</div>
                     <div className="cell-sub">{w.ceremony}</div>
                   </td>
-                  <td>
+                  <td data-label="Vendor">
                     <div>{v?.name}</div>
                     <div className="cell-sub">{w.category}</div>
                   </td>
-                  <td>{fmtINR(w.quote)}</td>
-                  <td><MiniStepper total={8} current={w.stage} amberStage={w.contingencyResolvedStage} /></td>
-                  <td>
+                  <td data-label="Quote">{fmtINR(w.quote)}</td>
+                  <td data-label="Progress"><MiniStepper total={8} current={w.stage} amberStage={w.contingencyResolvedStage} /></td>
+                  <td data-label="Stage">
                     {w.flagged
                       ? <Badge tone="warning" label="Contingency" />
                       : <span className="small muted">{w.stage}/8 · {STAGES[w.stage - 1]}</span>}
                   </td>
-                  <td><span className="muted">›</span></td>
+                  <td data-label=""><span className="muted">›</span></td>
                 </tr>
               );
             })}

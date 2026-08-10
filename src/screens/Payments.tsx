@@ -26,12 +26,12 @@ export default function Payments() {
               const vendor = wo && state.vendors.find((v) => v.id === wo.vendorId);
               return (
                 <tr key={m.id}>
-                  <td><div className="cell-main">{m.woId}</div><div className="cell-sub">{vendor?.name} · {wo?.ceremony}</div></td>
-                  <td>{m.label}</td>
-                  <td>{fmtINR(m.amount)}</td>
-                  <td className="muted">{m.due}</td>
-                  <td><Badge label={m.status} /></td>
-                  <td>
+                  <td data-label="Work order"><div className="cell-main">{m.woId}</div><div className="cell-sub">{vendor?.name} · {wo?.ceremony}</div></td>
+                  <td data-label="Milestone">{m.label}</td>
+                  <td data-label="Amount">{fmtINR(m.amount)}</td>
+                  <td data-label="Due" className="muted">{m.due}</td>
+                  <td data-label="Status"><Badge label={m.status} /></td>
+                  <td data-label="">
                     {(m.status === 'due' || m.status === 'overdue') && (
                       <button className="btn btn-primary btn-sm" onClick={() => dispatch({ type: 'MILESTONE_PAY', id: m.id })}>Mark paid</button>
                     )}

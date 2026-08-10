@@ -42,12 +42,12 @@ export default function Weddings() {
                 const wos = state.workOrders.filter((x) => x.weddingId === w.id);
                 return (
                   <tr key={w.id} className="clickable" onClick={() => navigate('/procurement')}>
-                    <td className="cell-main">{w.couple}</td>
-                    <td>{w.ceremonies}</td>
-                    <td>{w.month}</td>
-                    <td>{w.budget}</td>
-                    <td><Badge label={w.status} /></td>
-                    <td className="muted">{wos.length} open</td>
+                    <td data-label="Couple" className="cell-main">{w.couple}</td>
+                    <td data-label="Ceremonies">{w.ceremonies}</td>
+                    <td data-label="Month">{w.month}</td>
+                    <td data-label="Budget">{w.budget}</td>
+                    <td data-label="Status"><Badge label={w.status} /></td>
+                    <td data-label="Work orders" className="muted">{wos.length} open</td>
                   </tr>
                 );
               })}

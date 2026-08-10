@@ -95,17 +95,17 @@ export default function Dashboard() {
             <tbody>
               {vendors.map((v) => (
                 <tr key={v.id}>
-                  <td><div className="cell-main">{v.name}</div><div className="cell-sub">{v.empanelled}</div></td>
-                  <td>{v.category}</td>
-                  <td><Badge label={v.risk} /></td>
-                  <td><Badge label={v.tier} /></td>
-                  <td><Badge label={v.compliance} /></td>
-                  <td className="muted">{v.lastVerified}</td>
-                  <td><button className="btn btn-ghost btn-sm" onClick={() => setView(v)}>View</button></td>
+                  <td data-label="Vendor"><div className="cell-main">{v.name}</div><div className="cell-sub">{v.empanelled}</div></td>
+                  <td data-label="Category">{v.category}</td>
+                  <td data-label="Risk tier"><Badge label={v.risk} /></td>
+                  <td data-label="Roster tier"><Badge label={v.tier} /></td>
+                  <td data-label="Compliance"><Badge label={v.compliance} /></td>
+                  <td data-label="Last verified" className="muted">{v.lastVerified}</td>
+                  <td data-label=""><button className="btn btn-ghost btn-sm" onClick={() => setView(v)}>View</button></td>
                 </tr>
               ))}
               {vendors.length === 0 && (
-                <tr><td colSpan={7} className="muted" style={{ textAlign: 'center', padding: 28 }}>No vendors match the current filters.</td></tr>
+                <tr><td colSpan={7} data-label="" className="muted" style={{ textAlign: 'center', padding: 28 }}>No vendors match the current filters.</td></tr>
               )}
             </tbody>
           </table>

@@ -101,14 +101,14 @@ export default function SettingsScreen() {
                 <tbody>
                   {state.team.map((m) => (
                     <tr key={m.id}>
-                      <td>
+                      <td data-label="Member">
                         <div className="hstack">
                           <span className="avatar-s">{initials(m.name)}</span>
                           <span><div className="cell-main">{m.name}</div><div className="cell-sub">{m.email}</div></span>
                         </div>
                       </td>
-                      <td>{m.role}</td>
-                      <td><Badge label={m.status} /></td>
+                      <td data-label="Role">{m.role}</td>
+                      <td data-label="Status"><Badge label={m.status} /></td>
                     </tr>
                   ))}
                 </tbody>

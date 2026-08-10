@@ -604,4 +604,34 @@ a { color: var(--link); text-decoration: none; }
   .kpi-row { grid-template-columns: 1fr; }
   .content { padding: 16px; }
   .page-title { font-size: 18px; }
+
+  /* data tables -> stacked cards */
+  .table thead { display: none; }
+  .table, .table tbody { display: block; width: 100%; }
+  .table tbody tr {
+    display: block;
+    background: var(--surface-solid);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 4px 4px;
+    margin-bottom: 10px;
+  }
+  .table tbody tr td {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+  }
+  .table tbody tr td:last-child { border-bottom: 0; }
+  .table tbody tr td::before {
+    content: attr(data-label);
+    font-size: 11px; font-weight: 500; letter-spacing: 0.5px;
+    text-transform: uppercase; color: var(--muted);
+    text-align: left; flex: 0 0 auto;
+  }
+  /* action / chevron / empty cells: no label, full width */
+  .table tbody tr td[data-label=""]::before { content: none; }
+  .table tbody tr td[data-label=""] { justify-content: flex-end; }
 }
