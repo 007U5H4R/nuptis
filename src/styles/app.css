@@ -588,4 +588,20 @@ a { color: var(--link); text-decoration: none; }
     border: 1px solid var(--border); background: var(--subtle);
     border-radius: var(--radius-md); color: var(--text-secondary);
   }
+
+  /* topbar search fills the row; drop the keyboard hint */
+  .topbar { padding: 0 14px; gap: 10px; }
+  .tb-search { width: auto; flex: 1; min-width: 0; }
+  .tb-search .kbd { display: none; }
+  .tb-right { gap: 10px; }
+
+  /* popovers stay on-screen */
+  .search-pop { left: 12px; right: 12px; width: auto; }
+  .notif-pop { left: 12px; right: 12px; width: auto; }
+  .profile-pop { right: 12px; width: min(280px, calc(100vw - 24px)); }
+
+  /* single-column KPIs + tighter content padding */
+  .kpi-row { grid-template-columns: 1fr; }
+  .content { padding: 16px; }
+  .page-title { font-size: 18px; }
 }
