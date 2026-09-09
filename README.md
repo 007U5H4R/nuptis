@@ -1,87 +1,115 @@
-# Nuptis
+<p align="center">
+  <img src="./docs/screenshots/wordmark.png" alt="Nuptis" width="300">
+</p>
 
-**Vendor onboarding & procurement ops for wedding planning agencies** — a working SaaS front-end built 1:1 from the [NuptisV2 Figma design system](https://www.figma.com/design/2hvOt6R9g9iseQxHXTDRpv/NuptisV2).
+<p align="center"><strong>Vendor onboarding & procurement ops for wedding-planning agencies.</strong></p>
+<p align="center">Onboard vendors once with risk-tiered vetting, keep a pre-vetted backup tier, and make day-of contingency recovery a single click — penalties and SLAs included.</p>
 
-Wedding agencies run dozens of vendors (caterers, decor, pyrotechnics, priests, transport…) across parallel ceremonies. When a vendor fails on the day, trust normally resets to zero and someone starts cold-calling. Nuptis's core bet: **onboard once with risk-tiered verification, keep a pre-vetted Backup tier, and make day-of recovery a one-click activation** — penalty clauses and SLAs included.
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18-149eca" alt="React 18">
+  <img src="https://img.shields.io/badge/Vite%20%2B%20TypeScript-646cff" alt="Vite + TypeScript">
+  <img src="https://img.shields.io/badge/backend-Supabase%20(optional)-3ecf8e" alt="Supabase optional">
+</p>
 
-## Run it
+---
+
+**Nuptis** is a working SaaS front-end for the people who run weddings for a living. An agency juggles dozens of vendors — caterers, decor, pyrotechnics, priests, transport — across parallel ceremonies, and when one fails on the day, trust usually resets to zero and someone starts cold-calling. Nuptis's bet: **vet once, keep a Backup tier warm, and turn a no-show into a one-click reassignment** that reissues the work order, fires the penalty clause, and re-locks the SLA. It runs standalone from `localStorage` with a seeded demo dataset, or against a real Supabase/Postgres backend — the same screens, no code branches.
+
+## Highlights
+
+- **Vendor Roster Dashboard** — live KPIs (backup-tier coverage is *computed*, not hardcoded), an expiring-documents compliance banner, and category / risk-tier / roster-tier filters over the vendor table.
+- **Risk-tiered onboarding** — a 5-step chevron wizard (Category & Risk → Documents → References → Rate Card → Contract) where the risk tier drives the required-document checklist; publishing adds the vendor to the roster.
+- **Procurement Board** — every work order on an 8-segment mini-stepper, each row deep-linking straight to that order's live stage.
+- **8-stage work-order path** — a Salesforce-Path-style stepper (Requirements → Shortlist → Quote → Booking → Pre-Event → Payments → Execution → Settlement) with per-stage guidance and completion gates.
+- **Contingency Panel** ⚑ — the flagship. Four trigger types (no-show / extra resources / scope change / reconciliation), each opening a confirmation drawer of *pre-vetted* Backup-tier vendors. Confirming **actually mutates state**: the work order reassigns, a penalty milestone appears, the risk flag resolves, and the order's stage gets an amber flag.
+- **Payment Tracker** — a milestone ledger with computed collected / due / overdue KPIs, mark-paid, and penalty-recovery rows created by contingency activations.
+- **Two backends, one UI** — offline `localStorage` demo by default; add Supabase env vars and every business action mirrors to Postgres through four atomic functions.
+- **Design tokens, light & dark** — one token set (`tokens.css`) drives both themes via `[data-theme]`, ported 1:1 from the Figma variable modes. No UI framework — ~28 KB of purpose-built CSS.
+- **Global layer** — ⌘K search across vendors / weddings / work orders, a notifications panel with deep links, a toast system, and the rotating **aurora orb** that opens the Nuptis Assistant.
+
+## Screenshots
+
+### Vendor Roster Dashboard — live KPIs, compliance banner, filterable roster
+![Nuptis — Vendor Roster Dashboard](./docs/screenshots/dashboard.jpg)
+
+### Vendor Onboarding — the risk-tiered 5-step intake wizard
+![Nuptis — Vendor Onboarding](./docs/screenshots/onboarding.jpg)
+
+### Procurement Board — every work order with its 8-segment progress
+![Nuptis — Procurement Board](./docs/screenshots/procurement.jpg)
+
+### Stage view — the Salesforce-Path 8-stage stepper with per-stage guidance
+![Nuptis — Stage view](./docs/screenshots/stage.jpg)
+
+### Contingency Panel — four risk triggers, each drawing on pre-vetted backups
+![Nuptis — Contingency Panel](./docs/screenshots/contingency.jpg)
+
+### Activate Backup — the confirmation drawer that reassigns, penalizes, and re-locks
+![Nuptis — Activate Backup drawer](./docs/screenshots/contingency-drawer.jpg)
+
+### Payment Tracker — milestone ledger with computed collected / due / overdue
+![Nuptis — Payment Tracker](./docs/screenshots/payments.jpg)
+
+### Settings — workspace, team, appearance, and a typed-confirmation danger zone
+![Nuptis — Settings](./docs/screenshots/settings.jpg)
+
+## Getting started
+
+> Prerequisite: [Node.js](https://nodejs.org) 18+.
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
 ```
 
-**Two modes, same UI, zero code branches in the screens:**
+**Offline demo (default, no setup)** — sign in with any valid email and a 4+ character password to enter as the workspace Owner. Data is seeded and persisted to `localStorage`; **Profile → Reset demo data** restores the original dataset.
 
-- **Offline demo (default, no setup)** — sign in with any valid email + a 4-character password; you enter as the workspace Owner. Data is seeded and persisted to `localStorage`. **Profile → Reset demo data** restores the original dataset.
-- **Supabase-backed (real backend)** — once `.env.local` is present (see below), Login switches to real email/password auth, and every action in `store.tsx` mirrors to Postgres instead of `localStorage`. **Profile → Refresh workspace data** re-pulls from the database.
+**Supabase-backed (optional)** — create `.env.local` in the repo root (gitignored) and Login switches to real email/password auth, with every action mirrored to Postgres:
 
-### Connecting Supabase
+```bash
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...
+```
 
-1. Create a project at [supabase.com](https://supabase.com) → **Settings → API** → copy the **Project URL** and **`anon` `public`** key (never the `service_role` key).
-2. Create `.env.local` in the repo root (gitignored):
-   ```
-   VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJ...
-   ```
-3. **Authentication → Providers → Email** → turn off "Confirm email" for instant demo sign-ups (or leave it on for a real confirmation flow).
-4. **SQL Editor** → paste all of [`supabase/schema.sql`](supabase/schema.sql) → Run. This creates every table, Row Level Security policies, the seed dataset, and four Postgres functions (`activate_backup`, `source_backup`, `approve_change_order`, `log_outcome`) that each wrap a Contingency Panel confirmation in one atomic transaction.
-5. `npm run dev` (or rebuild) — Login now shows a Sign in / Create account toggle.
+Then paste [`supabase/schema.sql`](supabase/schema.sql) into the Supabase SQL Editor — it creates the tables, Row Level Security policies, the seed dataset, and the four contingency functions (`activate_backup`, `source_backup`, `approve_change_order`, `log_outcome`).
 
-RLS model: any authenticated user has full read/write access — this is a single-workspace app today (matches the product's current scope), not a multi-tenant SaaS. Adding tenants later means a `workspace_id` column plus a policy swap, not a rewrite.
+```bash
+npm run build      # tsc typecheck + vite build -> dist/
+npm run preview    # serve the production build locally
+```
 
-## What's implemented
+The build uses `HashRouter`, so the static `dist/` folder runs from any host — or straight off `file://` — with zero server config.
 
-| Area | What works |
-|---|---|
-| **Roster Dashboard** | Live KPIs (backup-tier coverage is computed, not hardcoded), compliance banner, category/risk/tier filters, vendor record drawer |
-| **Vendor Onboarding** | 5-step wizard on the chevron Stage Stepper — risk tier drives the document checklist; publishing adds the vendor to the roster |
-| **Weddings** | Wedding list + new wedding setup |
-| **Procurement Board** | All work orders with 8-segment mini-steppers; rows deep-link to each order's live stage |
-| **Stage view** | Salesforce-Path-style 8-stage stepper, per-stage guidance, stage advancement, amber contingency-resolved flags |
-| **Contingency Panel** ⚑ | The flagship. Four trigger types (no-show / extra resources / scope change / reconciliation), each opening a real slide-over drawer with backup-vendor options, impact summary and what-happens-next — confirming **actually mutates state**: work orders reassign, penalty milestones appear, flags resolve, stages get amber flags |
-| **Payment Tracker** | Milestone table with computed collected/due/overdue KPIs, mark-paid, penalty recoveries from contingency activations |
-| **Settings** | 4 tabs — Workspace (profile + light/dark/system appearance + typed-confirmation danger zone), Team (roles + invite drawer + pending invites), Notifications (high-severity alerts **locked on** — a product rule, not an oversight), Vendor defaults (the 30% advance / 2× penalty terms the drawers cite) |
-| **Global layer** | ⌘K search over vendors/weddings/work-orders, notifications panel with deep links, profile menu, toast system, and the **rotating aurora orb** opening the Nuptis Assistant (canned process-guide Q&A) |
+## How it works
 
-## Architecture
+- **Offline-first storage.** With no env vars the app runs entirely on `localStorage` against the seed data; when `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` are present, `isSupabaseConfigured` flips the same UI onto Postgres — no branching inside the screens.
+- **The reducer is the API surface.** Every business action (`ACTIVATE_BACKUP`, `SOURCE_BACKUP`, `APPROVE_CO`, `LOG_OUTCOME`, `ADVANCE_STAGE`, …) is one reducer case in `store.tsx`. Dispatch is optimistic locally, then mirrored to the matching atomic Postgres function; swapping the backend means implementing those actions server-side, not touching the UI.
+- **Tokens over hardcoding.** Every color flows through the CSS custom properties in `styles/tokens.css`, so light/dark parity is structural — the same guarantee the Figma file makes with its variable modes.
+- **No UI framework.** The dependency tree is just React, React Router, and the Supabase client; the design system is implemented directly as ~28 KB of hand-written CSS.
+
+## Development
+
+```bash
+npm run dev        # Vite dev server with HMR
+npm run build      # tsc typecheck (tsc && vite build) + production bundle
+npm run preview    # preview the built bundle
+```
+
+Type-checking runs as the first half of `npm run build` (`tsc`). There is no separate lint or unit-test script configured in this project.
 
 ```
 src/
   types.ts        domain model (Vendor, WorkOrder, Flag, Milestone, …)
-  seed.ts         demo dataset — mirrors the Figma mockup's content exactly
-  store.tsx       React context + reducer; every business action
-                  (ACTIVATE_BACKUP, APPROVE_CO, ADVANCE_STAGE, …) is a
-                  reducer case. Dispatch is optimistic: it applies locally,
-                  then — only when Supabase is configured and a session
-                  exists — mirrors the same action to Postgres; offline mode
-                  persists to localStorage instead, untouched by any of this.
-  lib/
-    supabase.ts   client + isSupabaseConfigured flag (env-driven)
-    cloud.ts      one function per mutating action + row<->type mappers;
-                  this is the entire surface a real backend has to implement
-  styles/
-    tokens.css    the NuptisV2 token set — light + dark via [data-theme],
-                  ported from the Figma variable collection (Light 3:2 / Dark 86:0)
-    app.css       components & layout, incl. the glass material system,
-                  chevron steppers and the aurora orb animation
-  components/     Shell (sidebar/topbar/popovers), Stepper, Assistant, ui kit
+  seed.ts         demo dataset — mirrors the Figma mockup's content 1:1
+  store.tsx       React context + reducer; one case per business action
+  lib/            supabase.ts (client + isSupabaseConfigured), cloud.ts (row<->type + atomic fns)
+  styles/         tokens.css (light/dark tokens) + app.css (components, glass, steppers, aurora orb)
+  components/     Shell, Stepper, Assistant, ui kit
   screens/        one file per screen
 ```
 
-**Design decisions**
+## Credits & license
 
-- **Tokens over hardcoding** — every color flows through the CSS custom properties in `tokens.css`, so light/dark parity is structural (the same guarantee the Figma file makes with its variable modes).
-- **The reducer is the API surface.** Each contingency confirmation maps to one action with real consequences (vendor reassignment, penalty milestone creation, compliance downgrades). Swapping `localStorage` for a backend means implementing these actions server-side; the UI doesn't change.
-- **HashRouter** so a static `dist/` build works from any host (or `file://`) with zero server config.
-- **No UI framework** — the Figma design system is small and specific enough that Tailwind/MUI would fight it. ~25KB of purpose-built CSS implements it exactly.
+Built 1:1 from the **NuptisV2 Figma design system** ([figma.com/design/2hvOt6R9g9iseQxHXTDRpv/NuptisV2](https://www.figma.com/design/2hvOt6R9g9iseQxHXTDRpv/NuptisV2)) as a Case Study grounding exercise: process doc → PRD → Figma prototype → this code. The seed data (Annapurna Caterers, WO-2041, the ₹5,04,000 penalty…) is the mockup's own narrative, kept intact so the prototype and the product tell the same story.
 
-## Productionizing path
-
-**Done:** real Postgres schema (`supabase/schema.sql`), real auth, RLS, and the four contingency actions as atomic server-side transactions instead of client-side object spreads.
-
-**Still ahead for a real multi-tenant product:** workspace scoping (one `workspace_id` column + policy change, not a rewrite — see above); role-based row access beyond "any authenticated user" (Settings already models Owner/Vendor Manager/Finance, RLS doesn't enforce it yet); Realtime subscriptions on `flags`/`notifications` so a second open tab sees a new risk flag land live; moving the two demo-scenario constants in `schema.sql` (the 30%-advance/2×-penalty math, the WO-2052 reprice amount) from hardcoded SQL into the already-editable Vendor Defaults tab.
-
-## Provenance
-
-Built from the Case Study 3 grounding exercise: process doc → PRD → NuptisV2 Figma prototype (~230 frames, dual-mode glass design system, click-through wired) → this code. The seed data (Annapurna Caterers, WO-2041, the ₹5,04,000 penalty…) is the mockup's own narrative, kept 1:1 so the prototype and the product tell the same story.
+No license file is included — this is a portfolio / case-study project; please ask before reuse.
