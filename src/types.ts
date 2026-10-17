@@ -190,6 +190,8 @@ export interface Session {
   email: string;
   name: string;
   role: TeamMember['role'];
+  /** "Continue without login" — sandboxed on seed data, never reads or writes Supabase. */
+  guest?: boolean;
 }
 
 export type Theme = 'light' | 'dark' | 'system';

@@ -24,6 +24,13 @@ export default function Login() {
     navigate('/');
   };
 
+  const continueAsGuest = () => {
+    // reset to seed first so a guest never sees a previous signed-in user's hydrated data
+    dispatch({ type: 'RESET_DEMO' });
+    dispatch({ type: 'LOGIN', session: { email: 'guest@nuptis.demo', name: 'Guest', role: 'Owner', guest: true } });
+    navigate('/');
+  };
+
   const submitCloud = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr(''); setInfo('');
@@ -56,6 +63,9 @@ export default function Login() {
         {info && <div className="caption" style={{ color: 'var(--success-text)' }}>{info}</div>}
         <button className="btn btn-primary" type="submit" disabled={busy}>
           {isSupabaseConfigured ? (busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : 'Create account') : 'Sign in'}
+        </button>
+        <button className="btn btn-secondary" type="button" onClick={continueAsGuest}>
+          Continue without login
         </button>
         {isSupabaseConfigured ? (
           <div className="caption muted" style={{ textAlign: 'center' }}>

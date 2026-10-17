@@ -342,7 +342,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   // optimistic dispatch: apply locally first, then mirror to Supabase (if configured)
   const dispatch: React.Dispatch<Action> = (action) => {
     rawDispatch(action);
-    if (isSupabaseConfigured && stateRef.current.session && !LOCAL_ONLY.has(action.type)) {
+    if (isSupabaseConfigured && stateRef.current.session && !stateRef.current.session.guest && !LOCAL_ONLY.has(action.type)) {
       syncAction(action).catch((err: Error) => {
         rawDispatch({ type: 'TOAST_PUSH', toast: { tone: 'danger', title: 'Sync failed — kept locally only', desc: err.message ?? String(err) } });
       });
@@ -350,7 +350,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   };
 
   const refresh = async () => {
-    if (!isSupabaseConfigured) {
+    if (!isSupabaseConfigured || stateRef.current.session?.guest) {
       rawDispatch({ type: 'RESET_DEMO' });
       return;
     }
@@ -369,7 +369,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     let active = true;
     const onAuthed = async (email: string | undefined) => {
       if (!email) {
-        rawDispatch({ type: 'LOGOUT' });
+        // a guest has no Supabase session by design — don't let the null-session event kick them out
+        if (!stateRef.current.session?.guest) rawDispatch({ type: 'LOGOUT' });
         return;
       }
       try {

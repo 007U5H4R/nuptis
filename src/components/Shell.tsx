@@ -208,13 +208,13 @@ export default function Shell() {
               <button className="p-row" onClick={() => go('/settings?tab=notifications')}>Notification preferences</button>
               <button className="p-row" onClick={() => { setPop(null); setAssistOpen(true); }}>Help &amp; process guide</button>
               <button className="p-row" onClick={() => { setPop(null); refresh(); }}>
-                {isSupabaseConfigured ? 'Refresh workspace data' : 'Reset demo data'}
+                {isSupabaseConfigured && !state.session?.guest ? 'Refresh workspace data' : 'Reset demo data'}
               </button>
               <hr className="divider" style={{ margin: '6px 0' }} />
               <button
                 className="p-row danger"
                 onClick={async () => {
-                  if (isSupabaseConfigured && supabase) await supabase.auth.signOut();
+                  if (isSupabaseConfigured && supabase && !state.session?.guest) await supabase.auth.signOut();
                   else dispatch({ type: 'LOGOUT' });
                   navigate('/login');
                 }}
